@@ -11,31 +11,51 @@ import itemsRoutes from './routes/items.js'
 import uploadRoutes from './routes/upload.js'
 
 dotenv.config()
+
 const app = express()
 const PORT = process.env.PORT || 3000
+const RAW_ORIGINS = process.env.CORS_ORIGIN || 'http://localhost:5173'
+const ALLOWED_ORIGINS = RAW_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
 
-// --- CORS Global (muito importante: vem antes de tudo) ---
-const FRONTEND_ORIGIN = 'https://cat-giftes.vercel.app'
+function isAllowedOrigin(origin) {
+  if (!origin) return true
+  return ALLOWED_ORIGINS.some(allowed => {
+    if (allowed.startsWith('*.')) {
+      const domain = allowed.slice(1)
+      return origin.endsWith(domain)
+    }
+    return origin === allowed
+  })
+}
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', FRONTEND_ORIGIN)
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  res.header('Access-Control-Allow-Credentials', 'true')
+// ✅ Middleware principal de CORS
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}))
 
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204) // responde preflight
-  }
+// ✅ Adicione ESTA LINHA logo após o app.use(cors(...))
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}))
 
-  next()
-})
-
-// Middlewares padrão
 app.use(express.json())
 app.use(morgan('dev'))
 app.use('/uploads', express.static(path.join(process.cwd(), 'backend', 'uploads')))
 
-// Rotas
 app.get('/', (_req, res) => res.json({ ok: true, name: 'Cat Giftes API' }))
 app.use('/auth', authRoutes)
 app.use('/users', usersRoutes)
@@ -43,13 +63,11 @@ app.use('/wishlists', wishlistsRoutes)
 app.use('/', itemsRoutes)
 app.use('/upload', uploadRoutes)
 
-// Erro global
 app.use((err, _req, res, _next) => {
-  console.error('🔥 Erro não tratado:', err)
+  console.error('Unhandled error:', err)
   res.status(500).json({ message: 'Server error' })
 })
 
-// Start
 app.listen(PORT, () => {
-  console.log(`🚀 API ouvindo em http://localhost:${PORT}`)
+  console.log(`API listening on http://localhost:${PORT}`)
 })
