@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 
 const ItemCard = ({ item }) => {
-  const { name, link, price, imageURL, description } = item;
+  const { name, link, price, imageUrl, description } = item;
   return (
     <motion.div whileHover={{ y: -4 }} className="card">
       <div className="aspect-video overflow-hidden">
-        {imageURL ? (
-          <img src={imageURL} alt={name} className="w-full h-full object-cover" />
+        {imageUrl ? (
+          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-700" />
         )}

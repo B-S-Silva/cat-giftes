@@ -1,0 +1,48 @@
+// Prisma schema for Cat Giftes
+// Database: PostgreSQL (Neon)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+
+  wishlists    Wishlist[]
+}
+
+model Wishlist {
+  id          String    @id @default(uuid())
+  userId      String
+  title       String
+  description String?
+  isPublic    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       Item[]
+}
+
+model Item {
+  id          String    @id @default(uuid())
+  wishlistId  String
+  name        String
+  link        String?
+  price       Float?
+  imageUrl    String?
+  description String?
+  isPurchased Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  wishlist    Wishlist  @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+}

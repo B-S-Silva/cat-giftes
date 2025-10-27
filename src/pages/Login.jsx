@@ -2,27 +2,25 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Gift, Mail, Lock, AlertCircle, LogIn } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setError("");
+    setLoading(true);
     try {
-      setError('');
-      setLoading(true);
       await login(email, password);
-      navigate('/home');
-    } catch (error) {
-      setError('Falha no login. Verifique seu email e senha.');
-      console.error(error);
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Falha no login");
     } finally {
       setLoading(false);
     }

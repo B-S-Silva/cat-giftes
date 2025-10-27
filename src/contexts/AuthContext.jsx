@@ -1,107 +1,53 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  GoogleAuthProvider, 
-  signInWithPopup,
-  updateProfile
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/config';
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../services/api";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);
 
-export function AuthProvider({ children, value }) {
-  const [currentUser, setCurrentUser] = useState(value?.user || null);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Registrar com email e senha (+ nome e foto opcional)
-  async function register(email, password, name, photoURL) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Atualizar o perfil do usuário com nome e foto
-      await updateProfile(userCredential.user, {
-        displayName: name,
-        photoURL: photoURL || userCredential.user.photoURL || null,
-      });
-      
-      // Criar documento do usuário no Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        name,
-        email,
-        photoURL: photoURL || userCredential.user.photoURL || null,
-        createdAt: new Date()
-      });
-      
-      return userCredential.user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Login com email e senha
-  async function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
-  }
-
-  // Login com Google
-  async function loginWithGoogle() {
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // Verificar se o usuário já existe no Firestore
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-      
-      // Se não existir, criar um novo documento
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", userCredential.user.uid), {
-          name: userCredential.user.displayName,
-          email: userCredential.user.email,
-          photoURL: userCredential.user.photoURL,
-          createdAt: new Date()
-        });
-      }
-      
-      return userCredential.user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Logout
-  function logout() {
-    return signOut(auth);
-  }
-
-  // Atualizar o usuário atual quando o estado de autenticação mudar
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-    return unsubscribe;
+    const token = localStorage.getItem("token");
+    if (!token) { setLoading(false); return; }
+    api.get("/users/me").then(res => {
+      setUser(res.data);
+    }).catch(() => {
+      localStorage.removeItem("token");
+      setUser(null);
+    }).finally(() => setLoading(false));
   }, []);
 
-  const valueCtx = {
-    currentUser,
-    register,
-    login,
-    loginWithGoogle,
-    logout
+  const register = async ({ name, email, password, avatarUrl }) => {
+    const res = await api.post("/auth/register", { name, email, password, avatarUrl });
+    localStorage.setItem("token", res.data.token);
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
+  const login = async (email, password) => {
+    const res = await api.post("/auth/login", { email, password });
+    localStorage.setItem("token", res.data.token);
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  const updateProfile = async ({ name, avatarUrl }) => {
+    const res = await api.put("/users/me", { name, avatarUrl });
+    setUser(res.data);
+    return res.data;
   };
 
   return (
-    <AuthContext.Provider value={valueCtx}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, loading, register, login, logout, updateProfile }}>
+      {children}
     </AuthContext.Provider>
   );
 }
-
-export default AuthContext;

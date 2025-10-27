@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 
 const Navbar = ({ toggleSidebar }) => {
-  const { currentUser, logout } = useAuth();
+  const { user: currentUser, logout } = useAuth();
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
@@ -48,9 +48,9 @@ const Navbar = ({ toggleSidebar }) => {
           {currentUser ? (
             <div className="flex items-center">
               <Link to="/profile" className="flex items-center">
-                {currentUser.photoURL ? (
+                {currentUser.avatarUrl ? (
                   <img 
-                    src={currentUser.photoURL} 
+                    src={currentUser.avatarUrl} 
                     alt="Perfil" 
                     className="h-8 w-8 rounded-full object-cover border-2 border-purple-500"
                   />
@@ -60,7 +60,7 @@ const Navbar = ({ toggleSidebar }) => {
                   </div>
                 )}
                 <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">
-                  {currentUser.displayName || 'Usuário'}
+                  {currentUser.name || 'Usuário'}
                 </span>
               </Link>
             </div>

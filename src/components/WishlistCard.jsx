@@ -5,11 +5,11 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const WishlistCard = ({ wishlist, user }) => {
-  const { id, title, description, isPublic, createdAt, imageURL } = wishlist;
+  const { id, title, description, isPublic, createdAt, imageUrl } = wishlist;
   
   // Formatar a data de criação
   const formattedDate = createdAt ? 
-    formatDistanceToNow(new Date(createdAt.toDate()), { addSuffix: true, locale: ptBR }) : 
+    formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: ptBR }) : 
     'Agora mesmo';
 
   return (
@@ -20,9 +20,9 @@ const WishlistCard = ({ wishlist, user }) => {
     >
       <Link to={`/wishlist/${id}`} className="block h-full">
         <div className="relative aspect-video overflow-hidden">
-          {imageURL ? (
+          {imageUrl ? (
             <img 
-              src={imageURL} 
+              src={imageUrl} 
               alt={title} 
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />
@@ -52,9 +52,9 @@ const WishlistCard = ({ wishlist, user }) => {
           <div className="mt-4 flex items-center justify-between">
             {user && (
               <div className="flex items-center">
-                {user.photoURL ? (
+                {user.avatarUrl ? (
                   <img 
-                    src={user.photoURL} 
+                    src={user.avatarUrl} 
                     alt={user.name} 
                     className="h-6 w-6 rounded-full object-cover"
                   />

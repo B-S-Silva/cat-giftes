@@ -1,60 +1,60 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../firebase/config';
-import { collection, addDoc, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import UploadButton from '../components/UploadButton';
 import WishlistCard from '../components/WishlistCard';
+import { getMyWishlists, createWishlist } from '../services/wishlists';
 
 const MyWishlists = () => {
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const [imageURL, setImageURL] = useState('');
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!currentUser) return;
-    const q = query(collection(db, 'wishlists'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), user: { name: currentUser.displayName, photoURL: currentUser.photoURL } }));
-      setWishlists(list);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [currentUser]);
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getMyWishlists();
+        if (!mounted) return;
+        setWishlists(data);
+      } catch (err) {
+        console.error(err);
+        if (!mounted) return;
+        setError('Falha ao carregar suas listas.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
-  const createWishlist = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    await addDoc(collection(db, 'wishlists'), {
-      userId: currentUser.uid,
-      title,
-      description,
-      isPublic,
-      imageURL: imageURL || null,
-      createdAt: serverTimestamp(),
-    });
-    setTitle('');
-    setDescription('');
-    setIsPublic(true);
-    setImageURL('');
-  };
-
-  const deleteWishlist = async (id) => {
-    await deleteDoc(doc(db, 'wishlists', id));
-  };
-
-  const toggleVisibility = async (w) => {
-    await updateDoc(doc(db, 'wishlists', w.id), { isPublic: !w.isPublic });
+    setSaving(true);
+    setError(null);
+    try {
+      const w = await createWishlist({ title, description, isPublic });
+      setWishlists((prev) => [w, ...prev]);
+      setTitle('');
+      setDescription('');
+      setIsPublic(true);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Falha ao criar a lista.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Minhas Listas</h2>
 
-      <form onSubmit={createWishlist} className="card p-4 mb-6">
+      <form onSubmit={handleCreate} className="card p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
@@ -71,14 +71,10 @@ const MyWishlists = () => {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição</label>
             <textarea className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagem da lista (opcional)</label>
-            <UploadButton onUpload={setImageURL} pathPrefix={`wishlists/${currentUser?.uid || 'anon'}`} label="Enviar thumbnail" />
-            {imageURL && <img src={imageURL} alt="Thumbnail" className="mt-2 h-24 rounded-md object-cover" />}
-          </div>
         </div>
-        <div className="mt-4">
-          <button type="submit" className="btn btn-primary">Criar lista</button>
+        <div className="mt-4 flex items-center gap-2">
+          <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Criando...' : 'Criar lista'}</button>
+          {error && <span className="text-red-600 dark:text-red-400 text-sm">{error}</span>}
         </div>
       </form>
 
@@ -89,10 +85,6 @@ const MyWishlists = () => {
           {wishlists.map((w) => (
             <div key={w.id} className="relative">
               <WishlistCard wishlist={w} user={w.user} />
-              <div className="absolute top-2 left-2 flex gap-2">
-                <button onClick={() => toggleVisibility(w)} className="btn btn-secondary text-xs">{w.isPublic ? 'Tornar privada' : 'Tornar pública'}</button>
-                <button onClick={() => deleteWishlist(w.id)} className="btn btn-secondary text-xs">Excluir</button>
-              </div>
             </div>
           ))}
           {wishlists.length === 0 && <div className="text-gray-600 dark:text-gray-300">Você ainda não tem listas.</div>}

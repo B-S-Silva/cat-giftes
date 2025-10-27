@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import UploadButton from '../components/UploadButton';
-import { updateProfile } from 'firebase/auth';
 
 const Profile = () => {
-  const { currentUser } = useAuth();
-  const [name, setName] = useState(currentUser?.displayName || '');
-  const [photoURL, setPhotoURL] = useState(currentUser?.photoURL || '');
+  const { user, updateProfile } = useAuth();
+  const [name, setName] = useState(user?.name || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [saving, setSaving] = useState(false);
 
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateProfile(currentUser, { displayName: name, photoURL });
+      await updateProfile({ name, avatarUrl });
       alert('Perfil atualizado!');
     } catch (err) {
       console.error(err);
@@ -34,8 +33,8 @@ const Profile = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto</label>
-            <UploadButton label="Enviar foto" onUpload={setPhotoURL} pathPrefix={`profile-photos/${currentUser?.uid || 'anon'}`} />
-            {photoURL && <img src={photoURL} alt="Foto" className="mt-2 h-16 w-16 rounded-full object-cover" />}
+            <UploadButton onUploaded={setAvatarUrl} />
+            {avatarUrl && <img src={avatarUrl} alt="Foto" className="mt-2 h-16 w-16 rounded-full object-cover" />}
           </div>
         </div>
         <div className="mt-4">

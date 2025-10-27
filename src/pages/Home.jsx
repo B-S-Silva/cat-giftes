@@ -1,35 +1,42 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase/config';
 import WishlistCard from '../components/WishlistCard';
+import { getPublicWishlists } from '../services/wishlists';
 
 const Home = () => {
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'wishlists'), where('isPublic', '==', true), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const list = [];
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        let user = null;
-        try {
-          const userDoc = await getDoc(doc(db, 'users', data.userId));
-          user = userDoc.exists() ? userDoc.data() : null;
-        } catch {}
-        list.push({ id: docSnap.id, ...data, user });
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getPublicWishlists();
+        if (!mounted) return;
+        setWishlists(data);
+      } catch (err) {
+        console.error(err);
+        if (!mounted) return;
+        setError('Falha ao carregar o feed público.');
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setWishlists(list);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    })();
+    return () => { mounted = false; };
   }, []);
 
   if (loading) {
     return (
       <div className="py-8">
         <p className="text-gray-600 dark:text-gray-300">Carregando feed...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-8">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
