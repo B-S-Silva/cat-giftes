@@ -1,16 +1,18 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Gift, Clock, Eye, EyeOff } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Gift, Clock, Eye, EyeOff } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 const WishlistCard = ({ wishlist, user }) => {
-  const { id, title, description, isPublic, createdAt, imageUrl } = wishlist;
-  
-  // Formatar a data de criação
+  const { id, title, description, isPublic, createdAt, imageUrl } = wishlist
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+  const coverSrc = imageUrl?.startsWith('/') ? baseURL + imageUrl : imageUrl
+  const avatarSrc = user?.avatarUrl?.startsWith('/') ? baseURL + user.avatarUrl : user?.avatarUrl
+
   const formattedDate = createdAt ? 
     formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: ptBR }) : 
-    'Agora mesmo';
+    'Agora mesmo'
 
   return (
     <motion.div 
@@ -20,9 +22,9 @@ const WishlistCard = ({ wishlist, user }) => {
     >
       <Link to={`/wishlist/${id}`} className="block h-full">
         <div className="relative aspect-video overflow-hidden">
-          {imageUrl ? (
+          {coverSrc ? (
             <img 
-              src={imageUrl} 
+              src={coverSrc} 
               alt={title} 
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />
@@ -31,8 +33,6 @@ const WishlistCard = ({ wishlist, user }) => {
               <Gift size={48} className="text-gray-400 dark:text-gray-500" />
             </div>
           )}
-          
-          {/* Badge de visibilidade */}
           <div className="absolute top-2 right-2 bg-white dark:bg-gray-800 rounded-full p-1 shadow-md">
             {isPublic ? (
               <Eye size={16} className="text-green-500" />
@@ -52,9 +52,9 @@ const WishlistCard = ({ wishlist, user }) => {
           <div className="mt-4 flex items-center justify-between">
             {user && (
               <div className="flex items-center">
-                {user.avatarUrl ? (
+                {avatarSrc ? (
                   <img 
-                    src={user.avatarUrl} 
+                    src={avatarSrc} 
                     alt={user.name} 
                     className="h-6 w-6 rounded-full object-cover"
                   />
@@ -79,7 +79,7 @@ const WishlistCard = ({ wishlist, user }) => {
         </div>
       </Link>
     </motion.div>
-  );
-};
+  )
+}
 
-export default WishlistCard;
+export default WishlistCard

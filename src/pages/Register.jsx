@@ -9,19 +9,21 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [photoURL, setPhotoURL] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+  const avatarSrc = avatarUrl?.startsWith('/') ? baseURL + avatarUrl : avatarUrl
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setError('');
       setLoading(true);
-      await register(email, password, name, photoURL);
-      navigate('/home');
+      await register({ name, email, password, avatarUrl });
+      navigate('/');
     } catch (err) {
       console.error(err);
       setError('Falha no cadastro. Verifique os dados e tente novamente.');
@@ -78,10 +80,11 @@ const Register = () => {
                   id="name"
                   name="name"
                   type="text"
+                  autoComplete="name"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-gray-50 dark:bg-gray-700 focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:text-white"
+                  className="bg-gray-50 dark:bg-gray-700 focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:text-white"
                   placeholder="Seu nome"
                 />
               </div>
@@ -134,10 +137,10 @@ const Register = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto de perfil (opcional)</label>
               <div className="mt-2">
-                <UploadButton label="Enviar foto" onUpload={setPhotoURL} pathPrefix={`profile-photos`} />
-                {photoURL && (
+                <UploadButton onUploaded={setAvatarUrl} uploadPath="/upload" />
+                {avatarSrc && (
                   <div className="mt-2">
-                    <img src={photoURL} alt="Foto" className="h-16 w-16 rounded-full object-cover" />
+                    <img src={avatarSrc} alt="Foto" className="h-16 w-16 rounded-full object-cover" />
                   </div>
                 )}
               </div>

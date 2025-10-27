@@ -1,17 +1,16 @@
 import axios from 'axios'
 
-// Cria a instância do Axios apontando para a API
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000', // porta do backend local
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
 })
 
-// Adiciona o token JWT automaticamente em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
+export const API_BASE_URL = BASE_URL
 export default api

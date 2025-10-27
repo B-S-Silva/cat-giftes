@@ -7,6 +7,8 @@ const Profile = () => {
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [saving, setSaving] = useState(false);
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const avatarSrc = avatarUrl?.startsWith('/') ? baseURL + avatarUrl : avatarUrl;
 
   const save = async (e) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ const Profile = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto</label>
             <UploadButton onUploaded={setAvatarUrl} />
-            {avatarUrl && <img src={avatarUrl} alt="Foto" className="mt-2 h-16 w-16 rounded-full object-cover" />}
+            {avatarSrc && <img src={avatarSrc} alt="Foto" className="mt-2 h-16 w-16 rounded-full object-cover" />}
           </div>
         </div>
         <div className="mt-4">

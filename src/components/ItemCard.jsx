@@ -1,12 +1,14 @@
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 const ItemCard = ({ item }) => {
-  const { name, link, price, imageUrl, description } = item;
+  const { name, link, price, imageUrl, description } = item
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+  const imgSrc = imageUrl?.startsWith('/') ? baseURL + imageUrl : imageUrl
   return (
     <motion.div whileHover={{ y: -4 }} className="card">
       <div className="aspect-video overflow-hidden">
-        {imageUrl ? (
-          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+        {imgSrc ? (
+          <img src={imgSrc} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-700" />
         )}
@@ -22,7 +24,7 @@ const ItemCard = ({ item }) => {
         </div>
       </div>
     </motion.div>
-  );
-};
+  )
+}
 
-export default ItemCard;
+export default ItemCard

@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 
 const Navbar = ({ toggleSidebar }) => {
   const { user: currentUser, logout } = useAuth();
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const avatarSrc = currentUser?.avatarUrl?.startsWith('/') ? baseURL + currentUser.avatarUrl : currentUser?.avatarUrl;
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
@@ -48,9 +50,9 @@ const Navbar = ({ toggleSidebar }) => {
           {currentUser ? (
             <div className="flex items-center">
               <Link to="/profile" className="flex items-center">
-                {currentUser.avatarUrl ? (
+                {avatarSrc ? (
                   <img 
-                    src={currentUser.avatarUrl} 
+                    src={avatarSrc} 
                     alt="Perfil" 
                     className="h-8 w-8 rounded-full object-cover border-2 border-purple-500"
                   />
