@@ -28,7 +28,17 @@ function isAllowedOrigin(origin) {
   })
 }
 
-app.use(cors({ origin: (origin, cb) => cb(null, isAllowedOrigin(origin)), credentials: true }))
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}))
+
 app.use(express.json())
 app.use(morgan('dev'))
 app.use('/uploads', express.static(path.join(process.cwd(), 'backend', 'uploads')))
