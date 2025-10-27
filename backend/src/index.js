@@ -17,27 +17,38 @@ const PORT = process.env.PORT || 3000
 const RAW_ORIGINS = process.env.CORS_ORIGIN || 'http://localhost:5173'
 const ALLOWED_ORIGINS = RAW_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
 
+import cors from 'cors'
+
+// --- CONFIG CORS INTELIGENTE ---
+const allowedOrigins = [
+  'https://cat-giftes.vercel.app', // produção
+  'https://cat-giftes-production.up.railway.app', // backend em produção
+]
+
 function isAllowedOrigin(origin) {
-  if (!origin) return true
-  return ALLOWED_ORIGINS.some(allowed => {
-    if (allowed.startsWith('*.')) {
-      const domain = allowed.slice(1)
-      return origin.endsWith(domain)
-    }
-    return origin === allowed
-  })
+  if (!origin) return true // para requisições internas (como healthcheck)
+  // permite localhost (qualquer porta)
+  if (origin.startsWith('http://localhost')) return true
+  // permite qualquer subdomínio do Vercel
+  if (origin.endsWith('.vercel.app')) return true
+  // verifica lista explícita
+  return allowedOrigins.includes(origin)
 }
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || isAllowedOrigin(origin)) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true
-}))
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true)
+      } else {
+        console.warn('🚫 Bloqueado por CORS:', origin)
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true,
+  })
+)
+
 
 app.use(express.json())
 app.use(morgan('dev'))
