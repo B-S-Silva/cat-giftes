@@ -8,6 +8,7 @@ const MyWishlists = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [eventDate, setEventDate] = useState('');
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,11 +38,12 @@ const MyWishlists = () => {
     setSaving(true);
     setError(null);
     try {
-      const w = await createWishlist({ title, description, isPublic });
+      const w = await createWishlist({ title, description, isPublic, eventDate: eventDate || undefined });
       setWishlists((prev) => [w, ...prev]);
       setTitle('');
       setDescription('');
       setIsPublic(true);
+      setEventDate('');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Falha ao criar a lista.');
@@ -66,6 +68,10 @@ const MyWishlists = () => {
               <option value="public">Pública</option>
               <option value="private">Privada</option>
             </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Data do evento</label>
+            <input type="datetime-local" className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição</label>

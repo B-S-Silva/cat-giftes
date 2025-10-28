@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getWishlistById } from '../services/wishlists';
+import { getWishlistById, updateWishlist } from '../services/wishlists';
 import { addItem as addItemApi, deleteItem as deleteItemApi } from '../services/items';
 import ItemCard from '../components/ItemCard';
+import { Calendar, Timer } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const WishlistDetail = () => {
   const { id } = useParams();
@@ -21,6 +24,9 @@ const WishlistDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [eventDateInput, setEventDateInput] = useState('');
+  const [countdown, setCountdown] = useState('');
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -31,6 +37,10 @@ const WishlistDetail = () => {
         if (!mounted) return;
         setWishlist(data);
         setItems(data.items || []);
+        if (data.eventDate) {
+          const iso = new Date(data.eventDate);
+          setEventDateInput(format(iso, "yyyy-MM-dd'T'HH:mm"));
+        }
       } catch (err) {
         console.error(err);
         if (!mounted) return;
@@ -44,6 +54,27 @@ const WishlistDetail = () => {
     return () => { mounted = false; };
   }, [id]);
 
+  useEffect(() => {
+    if (!wishlist?.eventDate) return;
+    const target = new Date(wishlist.eventDate).getTime();
+    const tick = () => {
+      const now = Date.now();
+      const diff = target - now;
+      if (diff <= 0) {
+        setCountdown('Evento iniciado!');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setCountdown(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    };
+    tick();
+    const int = setInterval(tick, 1000);
+    return () => clearInterval(int);
+  }, [wishlist?.eventDate]);
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -51,6 +82,16 @@ const WishlistDetail = () => {
     } catch {
       alert('Não foi possível copiar o link.');
     }
+  };
+
+  const googleCalendarUrl = () => {
+    if (!wishlist?.eventDate) return null;
+    const start = new Date(wishlist.eventDate);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const fmt = (d) => format(d, "yyyyMMdd'T'HHmmss");
+    const title = encodeURIComponent(wishlist.title || 'Evento MeowList');
+    const details = encodeURIComponent(wishlist.description || '');
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&details=${details}&sf=true&output=xml`;
   };
 
   const isOwner = !!user && !!wishlist && user.id === wishlist.userId;
@@ -78,6 +119,18 @@ const WishlistDetail = () => {
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || 'Falha ao adicionar item');
+    }
+  };
+
+  const saveEventDate = async () => {
+    if (!isOwner) return;
+    try {
+      const updated = await updateWishlist(id, { eventDate: eventDateInput || null });
+      setWishlist(updated);
+      alert('Data do evento atualizada!');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Falha ao atualizar data do evento');
     }
   };
 
@@ -121,6 +174,41 @@ const WishlistDetail = () => {
       {wishlist.description && (
         <p className="text-gray-700 dark:text-gray-300 mb-6">{wishlist.description}</p>
       )}
+
+      <div className="card p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar size={18} />
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              {wishlist.eventDate ? (
+                <>
+                  Evento em {format(new Date(wishlist.eventDate), "dd 'de' MMMM 'de' yyyy HH:mm", { locale: ptBR })}
+                </>
+              ) : (
+                'Sem data definida'
+              )}
+            </span>
+          </div>
+          {wishlist.eventDate && (
+            <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+              <Timer size={16} />
+              <span>{countdown}</span>
+              <a href={googleCalendarUrl()} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">Adicionar ao Google Calendar</a>
+            </div>
+          )}
+        </div>
+        {isOwner && (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Data do evento</label>
+              <input type="datetime-local" className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={eventDateInput} onChange={(e) => setEventDateInput(e.target.value)} />
+            </div>
+            <div className="flex items-end">
+              <button onClick={saveEventDate} className="btn btn-primary">Salvar data</button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {isOwner && (
         <form onSubmit={addItem} className="card p-4 mb-6">
