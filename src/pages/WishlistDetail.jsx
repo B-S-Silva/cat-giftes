@@ -84,6 +84,8 @@ const WishlistDetail = () => {
     }
   };
 
+  // Remover função de integração com Google Calendar
+  // (antes existia: const googleCalendarUrl = () => { ... })
   const googleCalendarUrl = () => {
     if (!wishlist?.eventDate) return null;
     const start = new Date(wishlist.eventDate);
@@ -193,7 +195,6 @@ const WishlistDetail = () => {
             <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
               <Timer size={16} />
               <span>{countdown}</span>
-              <a href={googleCalendarUrl()} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">Adicionar ao Google Calendar</a>
             </div>
           )}
         </div>
