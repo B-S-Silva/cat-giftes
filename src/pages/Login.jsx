@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Gift, Mail, Lock, AlertCircle, LogIn } from 'lucide-react';
+import { Mail, Lock, AlertCircle, LogIn } from 'lucide-react';
 import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
@@ -35,10 +35,10 @@ const Login = () => {
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
           className="flex justify-center"
         >
-          <Gift size={48} className="text-purple-600" />
+          <img src="/meow-cat.svg" alt="MeowList" className="h-12 w-12" />
         </motion.div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Entrar no Cat Giftes
+          Entrar no MeowList
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Ou{' '}
@@ -63,7 +63,7 @@ const Login = () => {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email
@@ -105,26 +105,6 @@ const Login = () => {
                   className="bg-gray-50 dark:bg-gray-700 focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:text-white"
                   placeholder="••••••••"
                 />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                  Lembrar de mim
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
-                  Esqueceu a senha?
-                </a>
               </div>
             </div>
 

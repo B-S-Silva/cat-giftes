@@ -10,7 +10,7 @@ const Sidebar = ({ isOpen }) => {
   return (
     <aside className={`fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out bg-white dark:bg-gray-900 w-64 shadow-lg z-20`}>
       <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
-        <Link to="/" className="text-2xl font-bold text-purple-600">Cat Giftes</Link>
+        <Link to="/" className="text-2xl font-bold text-purple-600">MeowList</Link>
       </div>
       <nav className="p-4 space-y-2">
         <Link to="/" className="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
