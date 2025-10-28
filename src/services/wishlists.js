@@ -10,13 +10,8 @@ export const getMyWishlists = async () => {
   return data
 }
 
-export const createWishlist = async ({ title, description, isPublic, eventDate }) => {
-  const { data } = await api.post('/wishlists', { title, description, isPublic, eventDate })
-  return data
-}
-
-export const updateWishlist = async (id, { title, description, isPublic, eventDate }) => {
-  const { data } = await api.put(`/wishlists/${id}`, { title, description, isPublic, eventDate })
+export const createWishlist = async ({ title, description, isPublic }) => {
+  const { data } = await api.post('/wishlists', { title, description, isPublic })
   return data
 }
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Menu, Search, User } from 'lucide-react';
+import { Menu, Search, Gift, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 
@@ -22,14 +22,13 @@ const Navbar = ({ toggleSidebar }) => {
             </button>
             
             <Link to="/" className="flex items-center ml-3">
-              <motion.img 
-                whileHover={{ rotate: 8, scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 250, damping: 18 }}
-                src="/meow-cat.svg"
-                alt="MeowList"
-                className="h-6 w-6 mr-2"
-              />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">MeowList</span>
+              <motion.div 
+                whileHover={{ rotate: 10 }}
+                className="text-purple-600 mr-2"
+              >
+                <Gift size={24} />
+              </motion.div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Cat Giftes</span>
             </Link>
           </div>
           

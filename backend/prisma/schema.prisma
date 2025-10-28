@@ -28,7 +28,6 @@ model Wishlist {
   description String?
   isPublic    Boolean   @default(false)
   createdAt   DateTime  @default(now())
-  eventDate   DateTime?
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   items       Item[]
