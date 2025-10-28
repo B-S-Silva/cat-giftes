@@ -7,7 +7,7 @@ export async function addItem(req, res) {
     if (!wl) return res.status(404).json({ message: 'Wishlist not found' })
     if (wl.userId !== req.user.id) return res.status(403).json({ message: 'Forbidden' })
 
-    const { name, link, price, description } = req.body
+    const { name, link, price, description, priority } = req.body
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined
     if (!name) return res.status(400).json({ message: 'Name is required' })
 
@@ -18,6 +18,7 @@ export async function addItem(req, res) {
         link,
         price: price ? parseFloat(price) : undefined,
         description,
+        priority,
         imageUrl,
       },
     })
@@ -38,7 +39,7 @@ export async function updateItem(req, res) {
     if (!existing) return res.status(404).json({ message: 'Item not found' })
     if (existing.wishlist.userId !== req.user.id) return res.status(403).json({ message: 'Forbidden' })
 
-    const { name, link, price, description, isPurchased } = req.body
+    const { name, link, price, description, isPurchased, priority } = req.body
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined
 
     const item = await prisma.item.update({
@@ -49,6 +50,7 @@ export async function updateItem(req, res) {
         price: price !== undefined ? parseFloat(price) : undefined,
         description,
         isPurchased: isPurchased !== undefined ? !!isPurchased : undefined,
+        priority,
         imageUrl,
       },
     })
@@ -71,6 +73,48 @@ export async function deleteItem(req, res) {
 
     await prisma.item.delete({ where: { id } })
     res.status(204).end()
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export async function reserveItemAnon(req, res) {
+  try {
+    const id = req.params.id
+    const item = await prisma.item.findUnique({
+      where: { id },
+      include: { wishlist: true },
+    })
+    if (!item) return res.status(404).json({ message: 'Item not found' })
+    if (!item.wishlist.isPublic) return res.status(403).json({ message: 'Forbidden' })
+
+    const updated = await prisma.item.update({
+      where: { id },
+      data: { isReserved: true },
+    })
+    res.json(updated)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+export async function unreserveItemAnon(req, res) {
+  try {
+    const id = req.params.id
+    const item = await prisma.item.findUnique({
+      where: { id },
+      include: { wishlist: true },
+    })
+    if (!item) return res.status(404).json({ message: 'Item not found' })
+    if (!item.wishlist.isPublic) return res.status(403).json({ message: 'Forbidden' })
+
+    const updated = await prisma.item.update({
+      where: { id },
+      data: { isReserved: false },
+    })
+    res.json(updated)
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'Server error' })

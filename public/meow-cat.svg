@@ -1,0 +1,33 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="meowGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000055" />
+    </filter>
+  </defs>
+  <g filter="url(#softShadow)">
+    <!-- Cat head -->
+    <path d="M64 16 C80 10 88 10 96 26 C104 42 112 42 112 64 C112 92 92 112 64 112 C36 112 16 92 16 64 C16 42 24 42 32 26 C40 10 48 10 64 16 Z" fill="url(#meowGradient)" />
+    <!-- Ears -->
+    <path d="M44 18 L36 8 L32 24 Z" fill="#F0ABFC" opacity="0.9" />
+    <path d="M84 18 L92 8 L96 24 Z" fill="#F0ABFC" opacity="0.9" />
+    <!-- Eyes -->
+    <circle cx="48" cy="60" r="6" fill="#0F172A" />
+    <circle cx="80" cy="60" r="6" fill="#0F172A" />
+    <!-- Nose -->
+    <circle cx="64" cy="72" r="3" fill="#F472B6" />
+    <!-- Whiskers -->
+    <path d="M24 70 C40 68 40 68 52 70" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+    <path d="M24 78 C40 80 40 80 52 78" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+    <path d="M76 70 C88 68 88 68 104 70" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+    <path d="M76 78 C88 80 88 80 104 78" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+    <!-- Subtle purr pulse -->
+    <circle cx="64" cy="92" r="10" fill="#FFFFFF" opacity="0.10">
+      <animate attributeName="r" values="9;11;9" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.08;0.16;0.08" dur="2s" repeatCount="indefinite" />
+    </circle>
+  </g>
+</svg>

@@ -2,10 +2,10 @@ import { prisma } from '../prisma.js'
 
 export async function createWishlist(req, res) {
   try {
-    const { title, description, isPublic } = req.body
+    const { title, description, isPublic, category } = req.body
     if (!title) return res.status(400).json({ message: 'Title is required' })
     const w = await prisma.wishlist.create({
-      data: { title, description, isPublic: !!isPublic, userId: req.user.id },
+      data: { title, description, isPublic: !!isPublic, category, userId: req.user.id },
     })
     res.status(201).json(w)
   } catch (err) {

@@ -8,6 +8,7 @@ const MyWishlists = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [category, setCategory] = useState('');
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,11 +38,12 @@ const MyWishlists = () => {
     setSaving(true);
     setError(null);
     try {
-      const w = await createWishlist({ title, description, isPublic });
+      const w = await createWishlist({ title, description, isPublic, category: category || undefined });
       setWishlists((prev) => [w, ...prev]);
       setTitle('');
       setDescription('');
       setIsPublic(true);
+      setCategory('');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Falha ao criar a lista.');
@@ -65,6 +67,18 @@ const MyWishlists = () => {
             <select className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={isPublic ? 'public' : 'private'} onChange={(e) => setIsPublic(e.target.value === 'public')}>
               <option value="public">Pública</option>
               <option value="private">Privada</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
+            <select className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">Sem categoria</option>
+              <option value="Tecnologia">Tecnologia</option>
+              <option value="Livros">Livros</option>
+              <option value="Maquiagem">Maquiagem</option>
+              <option value="Casa">Casa</option>
+              <option value="Pets">Pets</option>
+              <option value="Outros">Outros</option>
             </select>
           </div>
           <div className="md:col-span-2">

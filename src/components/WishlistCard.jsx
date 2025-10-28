@@ -5,7 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 const WishlistCard = ({ wishlist, user }) => {
-  const { id, title, description, isPublic, createdAt, imageUrl } = wishlist
+  const { id, title, description, isPublic, createdAt, imageUrl, category } = wishlist
   const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
   const coverSrc = imageUrl?.startsWith('/') ? baseURL + imageUrl : imageUrl
   const avatarSrc = user?.avatarUrl?.startsWith('/') ? baseURL + user.avatarUrl : user?.avatarUrl
@@ -45,6 +45,11 @@ const WishlistCard = ({ wishlist, user }) => {
         <div className="p-4">
           <div className="flex items-start justify-between">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">{title}</h3>
+            {category && (
+              <span className="ml-2 inline-flex items-center rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 text-xs">
+                {category}
+              </span>
+            )}
           </div>
           
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{description}</p>

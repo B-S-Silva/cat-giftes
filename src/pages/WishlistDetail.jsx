@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getWishlistById } from '../services/wishlists';
-import { addItem as addItemApi, deleteItem as deleteItemApi } from '../services/items';
+import { addItem as addItemApi, deleteItem as deleteItemApi, reserveItem, unreserveItem } from '../services/items';
 import ItemCard from '../components/ItemCard';
 
 const WishlistDetail = () => {
@@ -17,6 +17,7 @@ const WishlistDetail = () => {
   const [price, setPrice] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState('must');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,6 +68,7 @@ const WishlistDetail = () => {
         link: link || undefined,
         price: price ? Number(price) : undefined,
         description: description || undefined,
+        priority,
         imageFile,
       });
       setItems((prev) => [newItem, ...prev]);
@@ -75,6 +77,7 @@ const WishlistDetail = () => {
       setPrice('');
       setImageFile(null);
       setDescription('');
+      setPriority('must');
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || 'Falha ao adicionar item');
@@ -131,6 +134,13 @@ const WishlistDetail = () => {
             <input placeholder="Preço" type="number" step="0.01" className="rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={price} onChange={(e) => setPrice(e.target.value)} />
             <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" />
             <textarea placeholder="Descrição" className="md:col-span-2 rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+              <select className="mt-1 w-full rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-white" value={priority} onChange={(e) => setPriority(e.target.value)}>
+                <option value="must">Quero muito</option>
+                <option value="nice">Seria legal</option>
+              </select>
+            </div>
           </div>
           <div className="mt-4">
             <button type="submit" className="btn btn-primary">Adicionar</button>
@@ -142,11 +152,40 @@ const WishlistDetail = () => {
         {items.map((item) => (
           <div key={item.id}>
             <ItemCard item={item} />
-            {isOwner && (
-              <div className="mt-2 flex justify-end">
-                <button className="btn btn-secondary btn-sm" onClick={() => removeItem(item.id)}>Remover</button>
-              </div>
-            )}
+            <div className="mt-2 flex justify-between items-center">
+              {!isOwner && (
+                <div>
+                  {item.isReserved ? (
+                    <button className="btn btn-secondary btn-sm" onClick={async () => {
+                      try {
+                        const updated = await unreserveItem(item.id)
+                        setItems((prev) => prev.map((it) => (it.id === item.id ? updated : it)))
+                        alert('Reserva removida. Obrigado!')
+                      } catch (err) {
+                        console.error(err)
+                        alert(err.response?.data?.message || 'Falha ao remover reserva')
+                      }
+                    }}>Remover reserva</button>
+                  ) : (
+                    <button className="btn btn-primary btn-sm" onClick={async () => {
+                      try {
+                        const updated = await reserveItem(item.id)
+                        setItems((prev) => prev.map((it) => (it.id === item.id ? updated : it)))
+                        alert('Item reservado anonimamente! 🎁')
+                      } catch (err) {
+                        console.error(err)
+                        alert(err.response?.data?.message || 'Falha ao reservar')
+                      }
+                    }}>Reservar anonimamente</button>
+                  )}
+                </div>
+              )}
+              {isOwner && (
+                <div className="flex justify-end">
+                  <button className="btn btn-secondary btn-sm" onClick={() => removeItem(item.id)}>Remover</button>
+                </div>
+              )}
+            </div>
           </div>
         ))}
         {items.length === 0 && <div className="text-gray-600 dark:text-gray-300">Nenhum item ainda.</div>}

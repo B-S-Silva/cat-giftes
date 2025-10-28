@@ -26,6 +26,7 @@ model Wishlist {
   userId      String
   title       String
   description String?
+  category    String?
   isPublic    Boolean   @default(false)
   createdAt   DateTime  @default(now())
 
@@ -42,6 +43,8 @@ model Item {
   imageUrl    String?
   description String?
   isPurchased Boolean   @default(false)
+  isReserved  Boolean   @default(false)
+  priority    String?
   createdAt   DateTime  @default(now())
 
   wishlist    Wishlist  @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
