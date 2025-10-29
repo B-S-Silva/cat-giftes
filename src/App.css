@@ -40,3 +40,40 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Duolingo-inspired theme */
+:root {
+  --duo-green: #58cc02;
+  --duo-yellow: #ffde59;
+  --duo-blue: #1cb0f6;
+}
+
+.text-duo-green { color: var(--duo-green); }
+.bg-duo-green { background-color: var(--duo-green); }
+.bg-duo-yellow { background-color: var(--duo-yellow); }
+.bg-duo-blue { background-color: var(--duo-blue); }
+
+.duo-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.duo-progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.duo-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--duo-green), var(--duo-blue));
+  transition: width 0.4s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  transition: transform 0.15s ease;
+}

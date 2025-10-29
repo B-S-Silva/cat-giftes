@@ -17,6 +17,12 @@ model User {
   passwordHash String
   avatarUrl    String?
   createdAt    DateTime  @default(now())
+  // Gamified profile fields
+  xp           Int       @default(0)
+  level        Int       @default(1)
+  streak       Int       @default(0)
+  lastActive   DateTime?
+  badges       Json?
 
   wishlists    Wishlist[]
 }
