@@ -9,6 +9,7 @@ import usersRoutes from './routes/users.js'
 import wishlistsRoutes from './routes/wishlists.js'
 import itemsRoutes from './routes/items.js'
 import uploadRoutes from './routes/upload.js'
+import customDatesRoutes from './routes/customDates.js'
 
 dotenv.config()
 
@@ -62,6 +63,7 @@ app.use('/users', usersRoutes)
 app.use('/wishlists', wishlistsRoutes)
 app.use('/', itemsRoutes)
 app.use('/upload', uploadRoutes)
+app.use('/custom-dates', customDatesRoutes)
 
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err)

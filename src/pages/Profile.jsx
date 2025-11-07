@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import UploadButton from '../components/UploadButton';
+import CalendarPicker from '../components/CalendarPicker';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { customDatesService } from '../services/customDates';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -13,6 +15,7 @@ const Profile = () => {
   const [level, setLevel] = useState(user?.level || 1);
   const [streak, setStreak] = useState(user?.streak || 0);
   const [badges, setBadges] = useState(Array.isArray(user?.badges) ? user.badges : []);
+  const [customDates, setCustomDates] = useState([]);
   const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
   const avatarSrc = avatarUrl?.startsWith('/') ? baseURL + avatarUrl : avatarUrl;
 
@@ -21,12 +24,43 @@ const Profile = () => {
     setSaving(true);
     try {
       await updateProfile({ name, avatarUrl });
-      alert('Perfil atualizado!');
+      // Subtle success indication instead of alert
+      console.log('Perfil atualizado com sucesso!');
     } catch (err) {
       console.error(err);
-      alert('Falha ao atualizar perfil');
+      // Error handling without alert
+      console.error('Falha ao atualizar perfil');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAddDate = async (date, name) => {
+    try {
+      await customDatesService.createCustomDate(date, name);
+      await loadCustomDates();
+      // Removed alert for better UX
+      console.log('Data adicionada com sucesso!');
+    } catch (err) {
+      console.error('Erro ao adicionar data:', err);
+      // Removed error alert
+      console.error('Erro ao adicionar data');
+    }
+  };
+
+  const handleRemoveDate = async (date) => {
+    try {
+      const dateToDelete = customDates.find(d => d.date === date);
+      if (dateToDelete) {
+        await customDatesService.deleteCustomDate(dateToDelete.id);
+        await loadCustomDates();
+        // Removed alert for better UX
+        console.log('Data removida com sucesso!');
+      }
+    } catch (err) {
+      console.error('Erro ao remover data:', err);
+      // Removed error alert
+      console.error('Erro ao remover data');
     }
   };
 
@@ -36,7 +70,19 @@ const Profile = () => {
     setLevel(user?.level || 1);
     setStreak(user?.streak || 0);
     setBadges(Array.isArray(user?.badges) ? user.badges : []);
+    
+    // Carregar datas personalizadas
+    loadCustomDates();
   }, [user]);
+
+  const loadCustomDates = async () => {
+    try {
+      const dates = await customDatesService.getCustomDates();
+      setCustomDates(dates);
+    } catch (err) {
+      console.error('Erro ao carregar datas:', err);
+    }
+  };
 
   const claimDaily = async () => {
     try {
@@ -46,11 +92,12 @@ const Profile = () => {
       const xpRes = await api.post('/users/me/xp', { amount: 10 });
       setXp(xpRes.data.xp || xp + 10);
       setLevel(xpRes.data.level || level);
-      // Subtle notification
-      alert('Check-in diário concluído! +10 XP 🎉');
+      // Removed alert - let the UI show the change naturally
+      console.log('Check-in diário concluído! +10 XP');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Falha no check-in diário');
+      // Removed alert - let the error be handled by the UI
+      console.error(err.response?.data?.message || 'Falha no check-in diário');
     }
   };
 
@@ -58,10 +105,12 @@ const Profile = () => {
     try {
       const res = await api.post('/users/me/badges', { badge });
       setBadges(res.data.badges || []);
-      alert('Conquista adicionada! 🏅');
+      // Removed alert - let the UI show the new badge
+      console.log('Conquista adicionada!');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Falha ao adicionar conquista');
+      // Removed alert - let the error be handled by the UI
+      console.error(err.response?.data?.message || 'Falha ao adicionar conquista');
     }
   };
 
@@ -120,6 +169,17 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Calendário de Datas Personalizadas */}
+      <div className="mt-8">
+        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">📅 Calendário de Datas Especiais</h3>
+        <CalendarPicker
+          userDates={customDates}
+          onDateSelect={(date) => console.log('Data selecionada:', date)}
+          onAddDate={handleAddDate}
+          onRemoveDate={handleRemoveDate}
+        />
+      </div>
     </div>
   );
 };

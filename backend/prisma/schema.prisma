@@ -25,6 +25,18 @@ model User {
   badges       Json?
 
   wishlists    Wishlist[]
+  customDates  CustomDate[]
+}
+
+model CustomDate {
+  id          String   @id @default(uuid())
+  userId      String
+  date        String   // YYYY-MM-DD
+  name        String
+  color       String?  @default("bg-pink-500")
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Wishlist {

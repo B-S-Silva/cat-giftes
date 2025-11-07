@@ -7,7 +7,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import MyWishlists from './pages/MyWishlists'
 import WishlistDetail from './pages/WishlistDetail'
-import Profile from './pages/Profile'
+import ProfileModern from './pages/ProfileModern'
 import NotFound from './pages/NotFound'
 
 // Componentes
@@ -45,7 +45,7 @@ function App() {
               path="/profile"
               element={
                 <ProtectedRoute>
-                  <Profile />
+                  <ProfileModern />
                 </ProtectedRoute>
               }
             />
